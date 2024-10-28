@@ -1,11 +1,16 @@
-﻿namespace _72220577_FEUTS.Model
+﻿using System.Text.Json.Serialization;
+
+namespace _72220577_FEUTS.Model
 {
     public class category
     {
-        [ConfigurationKeyName("categoryId")]
+        [JsonPropertyName("categoryId")]
         public int categoryId { get; set; }
 
+        [JsonPropertyName("name")]
         public string name { get; set; }
+
+        [JsonPropertyName("description")]
         public string description { get; set; }
     }
 }

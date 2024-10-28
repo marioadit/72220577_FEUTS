@@ -1,0 +1,65 @@
+﻿@page "/categories"
+@inject HttpClient Http
+@using _72220577_FEUTS.Model
+
+@code {
+    private List<category> categories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await Http.GetFromJsonAsync<List<category>>("https://actualbackendapp.azurewebsites.net/api/v1/Categories");
+    }
+
+    private void EditCategory(int categoryId)
+    {
+        // Handle edit logic here
+        Console.WriteLine($"Edit category with ID: {categoryId}");
+    }
+
+    private async Task DeleteCategory(int categoryId)
+    {
+        // Send DELETE request to the API
+        var response = await Http.DeleteAsync($"https://actualbackendapp.azurewebsites.net/api/v1/Categories/{categoryId}");
+
+        // If delete is successful, remove the category from the list
+        if (response.IsSuccessStatusCode)
+        {
+            var categoryToRemove = categories.FirstOrDefault(c => c.categoryId == categoryId);
+            if (categoryToRemove != null)
+            {
+                categories.Remove(categoryToRemove);
+            }
+        }
+        else
+        {
+            Console.WriteLine($"Failed to delete category with ID {categoryId}: {response.ReasonPhrase}");
+        }
+    }
+}
+
+<h3>Category List</h3>
+<table class="table-bordered">
+    <thead>
+        <tr>
+            <th>Category ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>CRUD</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in categories)
+        {
+            <tr>
+                <td>@category.categoryId</td>
+                <td>@category.name</td>
+                <td>@category.description</td>
+                <td>
+                    <button class="btn btn-edit btn-primary" @onclick="@(() => EditCategory(category.categoryId))">Edit</button>
+                    <button class="btn btn-delete btn-primary" @onclick="@(() => DeleteCategory(category.categoryId))">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
