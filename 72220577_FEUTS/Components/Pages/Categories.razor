@@ -1,9 +1,11 @@
 ﻿@page "/categories"
 @inject HttpClient Http
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
 @using _72220577_FEUTS.Model
 
 <h3>Category List</h3>
-<button class="btn btn-new btn-primary">New Category</button>
+<button class="btn btn-new btn-primary" @onclick="@(() => CreateCategory())">New Category</button>
 <table class="table-bordered">
     <thead>
         <tr>
@@ -33,6 +35,10 @@
 @code {
     private List<category> categories = new();
 
+    private void CreateCategory(){
+            NavigationManager.NavigateTo($"/categories/new");
+    }
+
     protected override async Task OnInitializedAsync()
     {
         categories = await Http.GetFromJsonAsync<List<category>>("https://actualbackendapp.azurewebsites.net/api/v1/Categories");
@@ -40,8 +46,7 @@
 
     private void EditCategory(int categoryId)
     {
-        // Handle edit logic here
-        Console.WriteLine($"Edit category with ID: {categoryId}");
+        NavigationManager.NavigateTo($"/categories/{categoryId}");
     }
 
     private async Task DeleteCategory(int categoryId)
@@ -62,5 +67,8 @@
         {
             Console.WriteLine($"Failed to delete category with ID {categoryId}: {response.ReasonPhrase}");
         }
+
+        categories = await Http.GetFromJsonAsync<List<category>>("https://actualbackendapp.azurewebsites.net/api/v1/Categories");
+
     }
 }

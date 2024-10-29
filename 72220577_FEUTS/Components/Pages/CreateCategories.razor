@@ -1,0 +1,53 @@
+﻿@page "/categories/new"
+@rendermode InteractiveServer
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using _72220577_FEUTS.Model
+
+<h3>Create New Category</h3>
+
+<EditForm Model="@newCategory" OnValidSubmit="@HandleValidSubmit">
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input id="name" class="form-control" type="text" @bind="@newCategory.name" required />
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" class="form-control" @bind="@newCategory.description"></textarea>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <button type="button" class="btn btn-secondary" @onclick="turnback">Cancel</button>
+    </div>
+</EditForm>
+
+@code {
+    private category newCategory = new(); // New category object for binding
+
+    private void turnback()
+    {
+        NavigationManager.NavigateTo("/categories");
+    }   
+
+    private async Task HandleValidSubmit()
+    {
+        string apiUrl = "https://actualbackendapp.azurewebsites.net/api/v1/Categories";
+        var response = await Http.PostAsJsonAsync(apiUrl, newCategory);
+
+        if (response.IsSuccessStatusCode)
+        {
+            turnback();
+        }
+        else
+        {
+            Console.WriteLine("Error creating category");
+        }
+    }
+
+    public void Cancel()
+    {
+        NavigationManager.NavigateTo("/categories");
+    }
+}

@@ -1,0 +1,71 @@
+﻿@page "/categories/{id:int}"
+@rendermode InteractiveServer
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using _72220577_FEUTS.Model
+
+<h3>Edit Category Details</h3>
+
+@if (category != null)
+{
+    <EditForm Model="@category" OnValidSubmit="@HandleValidSubmit">
+        <div class="form-group">
+            <label for="categoryId">Category ID</label>
+            <input id="categoryId" class="form-control" type="text" @bind="@category.categoryId" readonly />
+        </div>
+
+        <div class="form-group">
+            <label for="name">Name</label>
+            <input id="name" class="form-control" type="text" @bind="@category.name" />
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" class="form-control" @bind="@category.description"></textarea>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="turnback">Cancel</button>
+        </div>
+    </EditForm>
+}
+else
+{
+    <p>There's no such category... Please get back</p>
+    <button type="button" class="btn btn-primary" @onclick="turnback">Back</button>
+
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private category category;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch a single category based on the id
+        category = await Http.GetFromJsonAsync<category>($"https://actualbackendapp.azurewebsites.net/api/v1/Categories/{id}");
+    }
+
+    public void turnback()
+    {
+        NavigationManager.NavigateTo("/categories");
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        string apiUrl = $"https://actualbackendapp.azurewebsites.net/api/v1/Categories/{id}";
+        var response = await Http.PutAsJsonAsync(apiUrl, category);
+
+        if (response.IsSuccessStatusCode)
+        {
+            turnback();
+        }
+        else
+        {
+            Console.WriteLine("Error updating category");
+        }
+    }
+}
