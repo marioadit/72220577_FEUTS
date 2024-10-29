@@ -2,6 +2,34 @@
 @inject HttpClient Http
 @using _72220577_FEUTS.Model
 
+<h3>Category List</h3>
+<button class="btn btn-new btn-primary">New Category</button>
+<table class="table-bordered">
+    <thead>
+        <tr>
+            <th>Category ID</th>
+            <th>Name</th>
+            <th>Description</th>
+            <th>CRUD</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in categories)
+        {
+            <tr>
+                <td>@category.categoryId</td>
+                <td>@category.name</td>
+                <td>@category.description</td>
+                <td>
+                    <button class="btn btn-edit btn-primary" @onclick="@(() => EditCategory(category.categoryId))">Edit</button>
+                    <button class="btn btn-delete btn-primary" @onclick="@(() => DeleteCategory(category.categoryId))">Delete</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
 @code {
     private List<category> categories = new();
 
@@ -36,30 +64,3 @@
         }
     }
 }
-
-<h3>Category List</h3>
-<table class="table-bordered">
-    <thead>
-        <tr>
-            <th>Category ID</th>
-            <th>Name</th>
-            <th>Description</th>
-            <th>CRUD</th>
-
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var category in categories)
-        {
-            <tr>
-                <td>@category.categoryId</td>
-                <td>@category.name</td>
-                <td>@category.description</td>
-                <td>
-                    <button class="btn btn-edit btn-primary" @onclick="@(() => EditCategory(category.categoryId))">Edit</button>
-                    <button class="btn btn-delete btn-primary" @onclick="@(() => DeleteCategory(category.categoryId))">Delete</button>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
