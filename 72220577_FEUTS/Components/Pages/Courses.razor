@@ -56,3 +56,98 @@
     }
 }
 
+<style>
+    .course-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    padding: 2rem; /* Use rem for padding */
+}
+
+.course-card {
+    width: 18rem; /* Set a fixed width for cards */
+    margin: 1.5rem; /* Margin between cards */
+    border: 0.1rem solid #ccc; /* Light border */
+    border-radius: 0.5rem; /* Rounded corners */
+    box-shadow: 0 0.4rem 0.8rem rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    overflow: hidden; /* Clip content */
+    display: flex;
+    flex-direction: column; /* Ensure vertical layout */
+    transition: transform 0.2s; /* Smooth hover effect */
+}
+
+.course-card:hover {
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+.card-img-top {
+    width: 100%; /* Make image fill the card */
+    height: 12rem; /* Set a fixed height */
+    object-fit: cover; /* Cover the area without stretching */
+}
+
+.card-body {
+    padding: 1.5rem; /* Padding for body */
+    flex: 1; /* Allow the card body to expand and fill space */
+    display: flex;
+    flex-direction: column; /* Ensure vertical layout */
+}
+
+.card-title {
+    font-size: 1.5rem; /* Increase title size */
+    margin: 0; /* Remove default margin */
+    color: #333; /* Darker color for the title */
+    max-height: 3rem; /* Set max height for title */
+    overflow: hidden; /* Hide overflow */
+    text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+    white-space: nowrap; /* Prevent title from wrapping */
+}
+
+.card-text {
+    color: #555; /* Lighter text color */
+    margin: 0.5rem 0; /* Add margin */
+    flex: 1; /* Allow text to expand and fill space */
+    max-height: 5rem; /* Set max height for description */
+    overflow-y: auto; /* Enable vertical scrolling */
+}
+
+    .card-actions {
+        display: flex;
+        justify-content: center; /* Center the buttons */
+        margin-top: 1rem; /* Add some margin on top */
+        padding: 0.5rem 0; /* Add vertical padding for spacing */
+    }
+
+    .btn {
+        margin: 0 0.5rem; /* Add horizontal spacing between buttons */
+        min-width: 8rem; /* Minimum width for buttons to prevent shrinking */
+        height: 3rem; /* Set a fixed height for buttons */
+        text-align: center; /* Center text in buttons */
+    }
+
+
+
+.badge {
+    margin: 1rem 0; /* Add margin to the badge */
+    font-size: 0.9rem; /* Smaller badge text */
+}
+
+    h3 {
+        font-size: 2rem; /* Increase font size */
+        color: #333; /* Darker color for better contrast */
+        margin-bottom: 1rem; /* Space below the header */
+        text-align: center; /* Center the header */
+        font-family: 'Arial', sans-serif; /* Use a modern font */
+    }
+
+    .btn-new {
+        display: block; /* Make the button block level for full width */
+        width: 100%; /* Full width of the container */
+        max-width: 15rem; /* Set a maximum width for the button */
+        margin: 0 auto; /* Center the button */
+        padding: 0.75rem 1.5rem; /* Adjust padding for more space */
+        font-size: 1.2rem; /* Increase font size */
+        border-radius: 0.5rem; /* Rounded corners */
+        transition: background-color 0.3s ease; /* Smooth background color change */
+    }
+</style>
