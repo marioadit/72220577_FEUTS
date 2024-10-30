@@ -6,10 +6,13 @@
 @using _72220577_FEUTS.Model
 
 <h3>Course List</h3>
+<div class="mb-3">
+    <input type="text" class="form-control" placeholder="Search by course name or category" @bind="searchTerm" @oninput="SearchCourses" />
+</div>
 <button class="btn btn-new btn-primary" @onclick="@(() => CreateCourse())">New Course</button>
 
 <div class="course-list">
-    @foreach (var course in courses)
+    @foreach (var course in filteredCourses)
     {
         <div class="card course-card">
             <img src="@course.imageName" alt="@course.name" class="card-img-top" />
@@ -29,6 +32,8 @@
 
 @code {
     private List<course> courses = new();
+    private List<course> filteredCourses = new(); // Store filtered results
+    private string searchTerm = string.Empty; // Store the search term
 
     private void CreateCourse()
     {
@@ -39,6 +44,7 @@
     {
         // Fetch courses using ccService
         courses = await ccService.GetCoursesAsync();
+        filteredCourses = courses; // Initialize filteredCourses
     }
 
     private void EditCourse(int courseId)
@@ -53,8 +59,30 @@
 
         // Update the course list after deletion
         courses = await ccService.GetCoursesAsync();
+        FilterCourses(); // Reapply the filter after deletion
+    }
+
+    private void SearchCourses(ChangeEventArgs e)
+    {
+        searchTerm = e.Value.ToString();
+        FilterCourses();
+    }
+
+    private void FilterCourses()
+    {
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filteredCourses = courses; // Show all courses if no search term
+        }
+        else
+        {
+            filteredCourses = courses.Where(c =>
+                c.name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                c.category.name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList(); // Filter by course name or category
+        }
     }
 }
+
 
 <style>
     .course-list {
