@@ -1,0 +1,87 @@
+﻿@page "/courses/{id:int}"
+@rendermode InteractiveServer
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@using _72220577_FEUTS.Services
+@inject ccService ccService
+@using _72220577_FEUTS.Model
+
+<h3>Edit Course Details</h3>
+
+@if (courseToEdit != null)
+{
+    <EditForm Model="@courseToEdit" OnValidSubmit="@HandleValidSubmit">
+        <div class="form-group">
+            <label for="courseId">Course ID</label>
+            <input id="courseId" class="form-control" type="text" @bind="@courseToEdit.courseId" readonly />
+        </div>
+
+        <div class="form-group">
+            <label for="name">Course Name</label>
+            <input id="name" class="form-control" type="text" @bind="@courseToEdit.name" />
+        </div>
+
+        <div class="form-group">
+            <label for="imageName">Image URL</label>
+            <input id="imageName" class="form-control" type="text" @bind="@courseToEdit.imageName" />
+        </div>
+
+        <div class="form-group">
+            <label for="duration">Duration (hours)</label>
+            <input id="duration" class="form-control" type="number" @bind="@courseToEdit.duration" min="1" />
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" class="form-control" @bind="@courseToEdit.description"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="category">Category</label>
+            <select id="category" class="form-control" @bind="@courseToEdit.categoryId" required>
+                <option value="">-- Select a Category --</option>
+                @foreach (var category in categories)
+                {
+                    <option value="@category.categoryId">@category.name</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="button" class="btn btn-secondary" @onclick="turnback">Cancel</button>
+        </div>
+    </EditForm>
+}
+else
+{
+    <p>Loading course details...</p>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private course courseToEdit; // This should be course instead of courses
+    private List<category> categories = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch the course details based on the id
+        courseToEdit = await ccService.GetCourseByIdAsync(id);
+
+        // Fetch categories for the dropdown list
+        categories = await ccService.GetCategoriesAsync();
+    }
+
+    private void turnback()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        await ccService.UpdateCourseAsync(courseToEdit); // Use the service to update the course
+        turnback(); // Navigate back after saving
+    }
+}

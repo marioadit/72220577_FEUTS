@@ -1,0 +1,68 @@
+﻿@page "/courses/new"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@using _72220577_FEUTS.Services
+@inject ccService ccService
+@using _72220577_FEUTS.Model
+
+<h3>Create New Course</h3>
+
+<EditForm Model="@newCourse" OnValidSubmit="@HandleValidSubmit">
+    <div class="form-group">
+        <label for="name">Course Name</label>
+        <input id="name" class="form-control" type="text" @bind="@newCourse.name" required />
+    </div>
+
+    <div class="form-group">
+        <label for="imageName">Image URL</label>
+        <input id="imageName" class="form-control" type="text" @bind="@newCourse.imageName" />
+    </div>
+
+    <div class="form-group">
+        <label for="duration">Duration (hours)</label>
+        <input id="duration" class="form-control" type="number" @bind="@newCourse.duration" min="1" required />
+    </div>
+
+    <div class="form-group">
+        <label for="description">Description</label>
+        <textarea id="description" class="form-control" @bind="@newCourse.description"></textarea>
+    </div>
+
+    <div class="form-group">
+        <label for="category">Category</label>
+        <select id="category" class="form-control" @bind="@newCourse.categoryId" required>
+            <option value="">-- Select a Category --</option>
+            @foreach (var category in categories)
+            {
+                <option value="@category.categoryId">@category.name</option>
+            }
+        </select>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    </div>
+</EditForm>
+
+@code {
+    private course newCourse = new(); // New course object for binding
+    private List<category> categories = new(); // List to hold categories from API
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch categories from ccService and populate the dropdown list
+        categories = await ccService.GetCategoriesAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        await ccService.AddCourseAsync(newCourse); // Use the service to add the course
+        Cancel(); // Navigate back to course list after creation
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/"); // Navigate to the home page
+    }
+}

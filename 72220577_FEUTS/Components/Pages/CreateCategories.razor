@@ -1,7 +1,8 @@
 ﻿@page "/categories/new"
 @rendermode InteractiveServer
-@inject HttpClient Http
 @inject NavigationManager NavigationManager
+@using _72220577_FEUTS.Services
+@inject ccService ccService
 @using _72220577_FEUTS.Model
 
 <h3>Create New Category</h3>
@@ -19,35 +20,24 @@
 
     <div class="form-group">
         <button type="submit" class="btn btn-primary">Create</button>
-        <button type="button" class="btn btn-secondary" @onclick="turnback">Cancel</button>
+        <button type="button" class="btn btn-secondary" @onclick="TurnBack">Cancel</button>
     </div>
 </EditForm>
 
 @code {
     private category newCategory = new(); // New category object for binding
 
-    private void turnback()
+    private void TurnBack()
     {
         NavigationManager.NavigateTo("/categories");
-    }   
+    }
 
     private async Task HandleValidSubmit()
     {
-        string apiUrl = "https://actualbackendapp.azurewebsites.net/api/v1/Categories";
-        var response = await Http.PostAsJsonAsync(apiUrl, newCategory);
+        // Use ccService to add the new category
+        await ccService.AddCategoryAsync(newCategory);
 
-        if (response.IsSuccessStatusCode)
-        {
-            turnback();
-        }
-        else
-        {
-            Console.WriteLine("Error creating category");
-        }
-    }
-
-    public void Cancel()
-    {
-        NavigationManager.NavigateTo("/categories");
+        // Navigate back to the categories page after successful submission
+        TurnBack();
     }
 }

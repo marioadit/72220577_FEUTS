@@ -1,7 +1,8 @@
 ﻿@page "/categories/{id:int}"
 @rendermode InteractiveServer
-@inject HttpClient Http
 @inject NavigationManager NavigationManager
+@using _72220577_FEUTS.Services
+@inject ccService ccService
 @using _72220577_FEUTS.Model
 
 <h3>Edit Category Details</h3>
@@ -26,15 +27,14 @@
 
         <div class="form-group">
             <button type="submit" class="btn btn-primary">Save</button>
-            <button type="button" class="btn btn-secondary" @onclick="turnback">Cancel</button>
+            <button type="button" class="btn btn-secondary" @onclick="TurnBack">Cancel</button>
         </div>
     </EditForm>
 }
 else
 {
     <p>There's no such category... Please get back</p>
-    <button type="button" class="btn btn-primary" @onclick="turnback">Back</button>
-
+    <button type="button" class="btn btn-primary" @onclick="TurnBack">Back</button>
 }
 
 @code {
@@ -45,27 +45,21 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // Fetch a single category based on the id
-        category = await Http.GetFromJsonAsync<category>($"https://actualbackendapp.azurewebsites.net/api/v1/Categories/{id}");
+        // Fetch a single category using ccService
+        category = await ccService.GetCategoryByIdAsync(id);
     }
 
-    public void turnback()
+    private void TurnBack()
     {
         NavigationManager.NavigateTo("/categories");
     }
 
     private async Task HandleValidSubmit()
     {
-        string apiUrl = $"https://actualbackendapp.azurewebsites.net/api/v1/Categories/{id}";
-        var response = await Http.PutAsJsonAsync(apiUrl, category);
+        // Update the category using ccService
+        await ccService.UpdateCategoryAsync(category);
 
-        if (response.IsSuccessStatusCode)
-        {
-            turnback();
-        }
-        else
-        {
-            Console.WriteLine("Error updating category");
-        }
+        // Navigate back to the categories page after successful update
+        TurnBack();
     }
 }

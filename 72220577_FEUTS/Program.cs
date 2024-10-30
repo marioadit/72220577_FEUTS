@@ -1,12 +1,16 @@
 using _72220577_FEUTS.Components;
+using _72220577_FEUTS.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<ccService>();
 
 builder.Services.AddHttpClient();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
 
 var app = builder.Build();
 

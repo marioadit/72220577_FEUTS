@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace _72220577_FEUTS.Model
+﻿namespace _72220577_FEUTS.Model
 {
     public class category
     {

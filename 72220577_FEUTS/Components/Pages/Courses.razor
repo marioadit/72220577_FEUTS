@@ -1,0 +1,58 @@
+﻿@page "/"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@using _72220577_FEUTS.Services
+@inject ccService ccService
+@using _72220577_FEUTS.Model
+
+<h3>Course List</h3>
+<button class="btn btn-new btn-primary" @onclick="@(() => CreateCourse())">New Course</button>
+
+<div class="course-list">
+    @foreach (var course in courses)
+    {
+        <div class="card course-card">
+            <img src="@course.imageName" alt="@course.name" class="card-img-top" />
+            <div class="card-body">
+                <h3 class="card-title">@course.name</h3>
+                <p class="card-text">@course.description</p>
+                <p><strong>Duration:</strong> @course.duration hours</p>
+                <span class="badge bg-secondary">@course.category.name</span>
+                <div class="card-actions">
+                    <button class="btn btn-edit btn-primary" @onclick="@(() => EditCourse(course.courseId))">Edit</button>
+                    <button class="btn btn-delete btn-danger" @onclick="@(() => DeleteCourse(course.courseId))">Delete</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<course> courses = new();
+
+    private void CreateCourse()
+    {
+        NavigationManager.NavigateTo("/courses/new");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch courses using ccService
+        courses = await ccService.GetCoursesAsync();
+    }
+
+    private void EditCourse(int courseId)
+    {
+        NavigationManager.NavigateTo($"/courses/{courseId}");
+    }
+
+    private async Task DeleteCourse(int courseId)
+    {
+        // Use ccService to delete the course
+        await ccService.DeleteCourseAsync(courseId);
+
+        // Update the course list after deletion
+        courses = await ccService.GetCoursesAsync();
+    }
+}
+

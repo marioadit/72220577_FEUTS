@@ -1,7 +1,8 @@
 ﻿@page "/categories"
-@inject HttpClient Http
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
+@using _72220577_FEUTS.Services
+@inject ccService ccService
 @using _72220577_FEUTS.Model
 
 <h3>Category List</h3>
@@ -31,18 +32,17 @@
     </tbody>
 </table>
 
-
 @code {
     private List<category> categories = new();
 
-    private void CreateCategory(){
-            NavigationManager.NavigateTo($"/categories/new");
+    private void CreateCategory()
+    {
+        NavigationManager.NavigateTo("/categories/new");
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        categories = await Http.GetFromJsonAsync<List<category>>("https://actualbackendapp.azurewebsites.net/api/v1/Categories");
-    }
+    protected override async Task OnInitializedAsync() =>
+        // Use ccService to fetch categories
+        categories = await ccService.GetCategoriesAsync();
 
     private void EditCategory(int categoryId)
     {
@@ -51,24 +51,9 @@
 
     private async Task DeleteCategory(int categoryId)
     {
-        // Send DELETE request to the API
-        var response = await Http.DeleteAsync($"https://actualbackendapp.azurewebsites.net/api/v1/Categories/{categoryId}");
+        await ccService.DeleteCategoryAsync(categoryId);
 
-        // If delete is successful, remove the category from the list
-        if (response.IsSuccessStatusCode)
-        {
-            var categoryToRemove = categories.FirstOrDefault(c => c.categoryId == categoryId);
-            if (categoryToRemove != null)
-            {
-                categories.Remove(categoryToRemove);
-            }
-        }
-        else
-        {
-            Console.WriteLine($"Failed to delete category with ID {categoryId}: {response.ReasonPhrase}");
-        }
-
-        categories = await Http.GetFromJsonAsync<List<category>>("https://actualbackendapp.azurewebsites.net/api/v1/Categories");
+        categories = await ccService.GetCategoriesAsync();
 
     }
 }
