@@ -6,9 +6,16 @@
 @using _72220577_FEUTS.Model
 
 <h3>Course List</h3>
-<div class="mb-3">
-    <input type="text" class="form-control" placeholder="Search by course name or category" @bind="searchTerm" @oninput="SearchCourses" />
+<div class="mb-3 input-group">
+    <input type="text"
+           class="form-control"
+           placeholder="Search by course name"
+           @bind="searchTerm" />
+    <button class="btn btn-primary" @onclick="async () => await SearchCourses()">
+        Find
+    </button>
 </div>
+
 <button class="btn btn-new btn-primary" @onclick="@(() => CreateCourse())">New Course</button>
 
 <div class="course-list">
@@ -31,9 +38,9 @@
 </div>
 
 @code {
-    private List<course> courses = new();
-    private List<course> filteredCourses = new(); // Store filtered results
-    private string searchTerm = string.Empty; // Store the search term
+    private List<course> courses = new(); // Original courses fetched
+    private List<course> filteredCourses = new(); // Courses displayed based on search
+    private string searchTerm = string.Empty; // User's search input
 
     private void CreateCourse()
     {
@@ -42,9 +49,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Fetch courses using ccService
+        // Fetch initial courses using ccService
         courses = await ccService.GetCoursesAsync();
-        filteredCourses = courses; // Initialize filteredCourses
+        filteredCourses = courses; // Initialize displayed courses
     }
 
     private void EditCourse(int courseId)
@@ -54,31 +61,25 @@
 
     private async Task DeleteCourse(int courseId)
     {
-        // Use ccService to delete the course
+        // Delete the course via service
         await ccService.DeleteCourseAsync(courseId);
 
-        // Update the course list after deletion
+        // Refresh course list
         courses = await ccService.GetCoursesAsync();
-        FilterCourses(); // Reapply the filter after deletion
+        filteredCourses = courses; // Reset to all courses
     }
 
-    private void SearchCourses(ChangeEventArgs e)
-    {
-        searchTerm = e.Value.ToString();
-        FilterCourses();
-    }
-
-    private void FilterCourses()
+    private async Task SearchCourses()
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
-            filteredCourses = courses; // Show all courses if no search term
+            // If search term is empty, reset to all courses
+            filteredCourses = courses;
         }
         else
         {
-            filteredCourses = courses.Where(c =>
-                c.name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                c.category.name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList(); // Filter by course name or category
+            // Call the service's search function
+            filteredCourses = await ccService.GetCoursesByNameAsync(searchTerm);
         }
     }
 }
@@ -176,5 +177,21 @@
         padding: 0.75rem 1.5rem; /* Adjust padding for more space */
         font-size: 1.2rem; /* Increase font size */
         border-radius: 0.5rem; /* Rounded corners */
+    }
+
+    .input-group {
+        display: flex;
+        align-items: center;
+    }
+
+    .input-group .form-control {
+        flex: 1; /* Make input fill the remaining space */
+        margin-right: 0.5rem; /* Add spacing between input and button */
+    }
+
+    .input-group .btn {
+        height: 100%; /* Match the button's height to the input */
+        padding: 0.5rem 1rem; /* Adjust padding */
+        font-size: 1rem; /* Ensure readable text */
     }
 </style>

@@ -68,6 +68,15 @@ namespace _72220577_FEUTS.Services
             await _httpClient.DeleteAsync($"https://actualbackendapp.azurewebsites.net/api/v1/Categories/{id}");
         }
 
+        public async Task<List<course>> GetCoursesByNameAsync(string courseName)
+        {
+            var response = await _httpClient.GetAsync($"https://actualbackendapp.azurewebsites.net/api/Courses/search/{courseName}");
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<List<course>>() ?? new List<course>();
+            }
+            throw new Exception($"Failed to load courses: {response.ReasonPhrase}");
+        }
 
     }
 }
