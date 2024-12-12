@@ -9,74 +9,133 @@ namespace _72220577_FEUTS.Services
     public class ccService
     {
         private readonly HttpClient _httpClient;
+        private readonly string baseUrl = "https://actbackendseervices.azurewebsites.net";
+        private readonly string CoursesBaseUrl;
+        private readonly string CategoriesBaseUrl;
+        private readonly string UsersBaseUrl;
+        private readonly string RerolsBaseUrl;
+        private readonly string LoginBaseUrl;
+        public string token;
 
         public ccService(HttpClient httpClient)
         {
             _httpClient = httpClient;
+            CoursesBaseUrl = $"{baseUrl}/api/courses";
+            CategoriesBaseUrl = $"{baseUrl}/api/categories";
+            UsersBaseUrl = $"{baseUrl}/api/users";
+            RerolsBaseUrl = $"{baseUrl}/api/registeruserrole";
+            LoginBaseUrl = $"{baseUrl}/api/login";
         }
 
-        public async Task<List<course>> GetCoursesAsync()
+        // Generic HTTP methods for reuse
+        private async Task<T> GetAsync<T>(string url)
         {
-            return await _httpClient.GetFromJsonAsync<List<course>>("https://actualbackendapp.azurewebsites.net/api/Courses");
+            EnsureBearerToken();
+            return await _httpClient.GetFromJsonAsync<T>(url);
         }
 
-        public async Task<course> GetCourseByIdAsync(int id)
+        private async Task PostAsync<T>(string url, T data)
         {
-            return await _httpClient.GetFromJsonAsync<course>($"https://actualbackendapp.azurewebsites.net/api/Courses/{id}");
+            EnsureBearerToken();
+            await _httpClient.PostAsJsonAsync(url, data);
         }
 
-        public async Task AddCourseAsync(course course)
+        private async Task PutAsync<T>(string url, T data)
         {
-            await _httpClient.PostAsJsonAsync("https://actualbackendapp.azurewebsites.net/api/Courses", course);
+            EnsureBearerToken();
+            await _httpClient.PutAsJsonAsync(url, data);
         }
 
-        public async Task UpdateCourseAsync(course course)
+        private async Task DeleteAsync(string url)
         {
-            await _httpClient.PutAsJsonAsync($"https://actualbackendapp.azurewebsites.net/api/Courses/{course.courseId}", course);
+            EnsureBearerToken();
+            await _httpClient.DeleteAsync(url);
         }
 
-        public async Task DeleteCourseAsync(int id)
+        // Ensures the Bearer Token is set for every request to Categories endpoints
+        private void EnsureBearerToken()
         {
-            await _httpClient.DeleteAsync($"https://actualbackendapp.azurewebsites.net/api/Courses/{id}");
+            if (!string.IsNullOrEmpty(token))
+            {
+                _httpClient.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
         }
 
-        public async Task<List<category>> GetCategoriesAsync()
-        {
-            var response = await _httpClient.GetAsync("https://actualbackendapp.azurewebsites.net/api/v1/Categories"); // Replace with your actual API endpoint
-            response.EnsureSuccessStatusCode();
+        // Course-related methods
+        public async Task<List<course>> GetCoursesAsync() =>
+            await GetAsync<List<course>>(CoursesBaseUrl);
 
-            return await response.Content.ReadFromJsonAsync<List<category>>();
-        }
+        public async Task<course> GetCourseByIdAsync(int id) =>
+            await GetAsync<course>($"{CoursesBaseUrl}/{id}");
 
-        public async Task<category> GetCategoryByIdAsync(int id)
-        {
-            return await _httpClient.GetFromJsonAsync<category>($"https://actualbackendapp.azurewebsites.net/api/v1/Categories/{id}");
-        }
+        public async Task AddCourseAsync(course course) =>
+            await PostAsync(CoursesBaseUrl, course);
 
-        public async Task AddCategoryAsync(category category)
-        {
-            await _httpClient.PostAsJsonAsync("https://actualbackendapp.azurewebsites.net/api/v1/Categories", category);
-        }
+        public async Task UpdateCourseAsync(course course) =>
+            await PutAsync($"{CoursesBaseUrl}/{course.courseId}", course);
 
-        public async Task UpdateCategoryAsync(category category)
-        {
-            await _httpClient.PutAsJsonAsync($"https://actualbackendapp.azurewebsites.net/api/v1/Categories/{category.categoryId}", category);
-        }
+        public async Task DeleteCourseAsync(int id) =>
+            await DeleteAsync($"{CoursesBaseUrl}/{id}");
 
-        public async Task DeleteCategoryAsync(int id)
-        {
-            await _httpClient.DeleteAsync($"https://actualbackendapp.azurewebsites.net/api/v1/Categories/{id}");
-        }
+        public async Task<List<course>> GetCoursesByNameAsync(string courseName) =>
+            await GetAsync<List<course>>($"{CoursesBaseUrl}/search/{courseName}");
 
-        public async Task<List<course>> GetCoursesByNameAsync(string courseName)
+        // Category-related methods
+        public async Task<List<category>> GetCategoriesAsync() =>
+            await GetAsync<List<category>>(CategoriesBaseUrl);
+
+        public async Task<category> GetCategoryByIdAsync(int id) =>
+            await GetAsync<category>($"{CategoriesBaseUrl}/{id}");
+
+        public async Task AddCategoryAsync(category category) =>
+            await PostAsync(CategoriesBaseUrl, category);
+
+        public async Task UpdateCategoryAsync(category category) =>
+            await PutAsync($"{CategoriesBaseUrl}/{category.categoryId}", category);
+
+        public async Task DeleteCategoryAsync(int id) =>
+            await DeleteAsync($"{CategoriesBaseUrl}/{id}");
+
+        // User-related methods
+        public async Task AddUserAsync(user user) =>
+            await PostAsync(UsersBaseUrl, user);
+
+        // Register user role-related methods
+        public async Task AddRegisterUserRoleAsync(registeruserrole registeruserrole) =>
+            await PostAsync(RerolsBaseUrl, registeruserrole);
+
+        // Login-related methods
+        public async Task<string> LoginAsync(login login)
         {
-            var response = await _httpClient.GetAsync($"https://actualbackendapp.azurewebsites.net/api/Courses/search/{courseName}");
+            var response = await _httpClient.PostAsJsonAsync(LoginBaseUrl, login);
+
             if (response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<List<course>>() ?? new List<course>();
-            }
-            throw new Exception($"Failed to load courses: {response.ReasonPhrase}");
-        }
+                var loginResponse = await response.Content.ReadFromJsonAsync<loginresponse>();
 
+                // Validate if the token exists in the response
+                if (loginResponse?.token != null)
+                {
+                    this.token = loginResponse.token;
+
+                    // Add the token to the HttpClient headers for authenticated requests
+                    _httpClient.DefaultRequestHeaders.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", this.token);
+
+                    return token; // Return the token for further use if needed
+                }
+                else
+                {
+                    throw new Exception("Login successful, but token is missing in the response.");
+                }
+            }
+            else
+            {
+                // Handle error response and throw detailed exception
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Login failed: {response.ReasonPhrase}. Details: {errorContent}");
+            }
+        }
     }
 }

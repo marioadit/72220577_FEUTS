@@ -1,8 +1,7 @@
 ﻿@page "/"
 @rendermode InteractiveServer
 @inject NavigationManager NavigationManager
-@using _72220577_FEUTS.Services
-@inject ccService ccService
+@inject HttpClient HttpClient
 @using _72220577_FEUTS.Model
 
 <h3>Course List</h3>
@@ -11,7 +10,7 @@
            class="form-control"
            placeholder="Search by course name"
            @bind="searchTerm" />
-    <button class="btn btn-primary" @onclick="async () => await SearchCourses()">
+    <button class="btn btn-primary" @onclick="SearchCourses">
         Find
     </button>
 </div>
@@ -49,8 +48,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Fetch initial courses using ccService
-        courses = await ccService.GetCoursesAsync();
+        // Fetch initial courses using HttpClient
+        courses = await HttpClient.GetFromJsonAsync<List<course>>("https://actbackendseervices.azurewebsites.net/api/courses");
         filteredCourses = courses; // Initialize displayed courses
     }
 
@@ -61,15 +60,15 @@
 
     private async Task DeleteCourse(int courseId)
     {
-        // Delete the course via service
-        await ccService.DeleteCourseAsync(courseId);
+        // Delete the course via HttpClient
+        await HttpClient.DeleteAsync($"https://actbackendseervices.azurewebsites.net/api/courses/{courseId}");
 
         // Refresh course list
-        courses = await ccService.GetCoursesAsync();
+        courses = await HttpClient.GetFromJsonAsync<List<course>>("https://actbackendseervices.azurewebsites.net/api/courses");
         filteredCourses = courses; // Reset to all courses
     }
 
-    private async Task SearchCourses()
+    private void SearchCourses()
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -78,11 +77,14 @@
         }
         else
         {
-            // Call the service's search function
-            filteredCourses = await ccService.GetCoursesByNameAsync(searchTerm);
+            filteredCourses = courses.Where(course =>
+                course.name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                course.category.name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
         }
     }
 }
+
 
 
 <style>

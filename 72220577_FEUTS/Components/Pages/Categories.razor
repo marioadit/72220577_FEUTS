@@ -7,6 +7,18 @@
 
 <h3>Category List</h3>
 <button class="btn btn-new btn-primary" @onclick="@(() => CreateCategory())">New Category</button>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @errorMessage
+        @if (!string.IsNullOrEmpty(token))
+        {
+            <div><strong>Token:</strong> @token</div>
+        }
+    </div>
+}
+
 <table class="table-bordered">
     <thead>
         <tr>
@@ -17,16 +29,25 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var category in categories)
+        @if (categories != null && categories.Any())
+        {
+            @foreach (var category in categories)
+            {
+                <tr>
+                    <td>@category.categoryId</td>
+                    <td>@category.name</td>
+                    <td>@category.description</td>
+                    <td>
+                        <button class="btn btn-edit btn-primary" @onclick="@(() => EditCategory(category.categoryId))">Edit</button>
+                        <button class="btn btn-delete btn-primary" @onclick="@(() => DeleteCategory(category.categoryId))">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+        else
         {
             <tr>
-                <td>@category.categoryId</td>
-                <td>@category.name</td>
-                <td>@category.description</td>
-                <td>
-                    <button class="btn btn-edit btn-primary" @onclick="@(() => EditCategory(category.categoryId))">Edit</button>
-                    <button class="btn btn-delete btn-primary" @onclick="@(() => DeleteCategory(category.categoryId))">Delete</button>
-                </td>
+                <td colspan="4">No categories available.</td>
             </tr>
         }
     </tbody>
@@ -34,15 +55,26 @@
 
 @code {
     private List<category> categories = new();
+    private string errorMessage = string.Empty;
+    private string token = string.Empty; // Placeholder to show the token on error
 
     private void CreateCategory()
     {
         NavigationManager.NavigateTo("/categories/new");
     }
 
-    protected override async Task OnInitializedAsync() =>
-        // Use ccService to fetch categories
-        categories = await ccService.GetCategoriesAsync();
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            categories = await ccService.GetCategoriesAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            token = await GetTokenAsync(); // Fetch token to display
+        }
+    }
 
     private void EditCategory(int categoryId)
     {
@@ -51,9 +83,22 @@
 
     private async Task DeleteCategory(int categoryId)
     {
-        await ccService.DeleteCategoryAsync(categoryId);
+        try
+        {
+            await ccService.DeleteCategoryAsync(categoryId);
+            categories = await ccService.GetCategoriesAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            token = await GetTokenAsync(); // Fetch token to display
+        }
+    }
 
-        categories = await ccService.GetCategoriesAsync();
-
+    // Method to fetch the token from the ccService
+    private Task<string> GetTokenAsync()
+    {
+        // Assuming ccService provides the token as a public property
+        return Task.FromResult(ccService.token); // Replace with actual method if needed
     }
 }
