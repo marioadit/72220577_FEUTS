@@ -15,6 +15,8 @@ namespace _72220577_FEUTS.Services
         private readonly string UsersBaseUrl;
         private readonly string RerolsBaseUrl;
         private readonly string LoginBaseUrl;
+        private readonly string InstructorsBaseUrl;
+        private readonly string EnrollmentsBaseUrl;
         public string token;
 
         public ccService(HttpClient httpClient)
@@ -25,6 +27,8 @@ namespace _72220577_FEUTS.Services
             UsersBaseUrl = $"{baseUrl}/api/users";
             RerolsBaseUrl = $"{baseUrl}/api/registeruserrole";
             LoginBaseUrl = $"{baseUrl}/api/login";
+            InstructorsBaseUrl = $"{baseUrl}/api/instructors"; // New URL for instructors
+            EnrollmentsBaseUrl = $"{baseUrl}/api/enrollments"; // New URL for enrollments
         }
 
         // Generic HTTP methods for reuse
@@ -96,6 +100,19 @@ namespace _72220577_FEUTS.Services
 
         public async Task DeleteCategoryAsync(int id) =>
             await DeleteAsync($"{CategoriesBaseUrl}/{id}");
+
+        // Instructor-related methods
+        public async Task<List<instructors>> GetInstructorsAsync() =>
+            await GetAsync<List<instructors>>(InstructorsBaseUrl);
+
+
+        // Enrollment-related methods
+        public async Task<List<enrollments>> GetEnrollmentsAsync() =>
+            await GetAsync<List<enrollments>>(EnrollmentsBaseUrl);
+
+        public async Task AddEnrollmentAsync(enrollcreate enrollment) =>
+            await PostAsync(EnrollmentsBaseUrl, enrollment);
+
 
         // User-related methods
         public async Task AddUserAsync(user user) =>

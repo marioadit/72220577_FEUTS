@@ -1,0 +1,43 @@
+﻿@page "/enrollments/new"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@using _72220577_FEUTS.Services
+@inject ccService ccService
+@using _72220577_FEUTS.Model
+
+<h3>Create New Enrollment</h3>
+
+<EditForm Model="@newEnrollment" OnValidSubmit="@HandleValidSubmit">
+    <div class="form-group">
+        <label for="instructorId">Instructor ID</label>
+        <input id="instructorId" class="form-control" type="number" @bind="@newEnrollment.instructorId" required />
+    </div>
+
+    <div class="form-group">
+        <label for="courseId">Course ID</label>
+        <input id="courseId" class="form-control" type="number" @bind="@newEnrollment.courseId" required />
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Create</button>
+        <button type="button" class="btn btn-secondary" @onclick="TurnBack">Cancel</button>
+    </div>
+</EditForm>
+
+@code {
+    private enrollcreate newEnrollment = new(); // New enrollment object for binding
+
+    private void TurnBack()
+    {
+        NavigationManager.NavigateTo("/enrollments");
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        // Use ccService to add the new enrollment
+        await ccService.AddEnrollmentAsync(newEnrollment);
+
+        // Navigate back to the enrollments page after successful submission
+        TurnBack();
+    }
+}

@@ -1,0 +1,82 @@
+﻿@page "/enrollments"
+@rendermode InteractiveServer
+@inject NavigationManager NavigationManager
+@using _72220577_FEUTS.Services
+@inject ccService ccService
+@using _72220577_FEUTS.Model
+
+<h3>Enrollment List</h3>
+<button class="btn btn-new btn-primary" @onclick="@(() => CreateEnrollment())">New Enrollment</button>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">
+        <strong>Error:</strong> @errorMessage
+        @if (!string.IsNullOrEmpty(token))
+        {
+            <div><strong>Token:</strong> @token</div>
+        }
+    </div>
+}
+
+<table class="table-bordered">
+    <thead>
+        <tr>
+            <th>Enrollment ID</th>
+            <th>Instructor ID</th>
+            <th>Course ID</th>
+            <th>Enrolled At</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (enrollments != null && enrollments.Any())
+        {
+            @foreach (var enrollment in enrollments)
+            {
+                <tr>
+                    <td>@enrollment.enrollmentId</td>
+                    <td>@enrollment.instructorId</td>
+                    <td>@enrollment.courseId</td>
+                    <td>@enrollment.enrolledAt</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="4">No enrollments available.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<enrollments> enrollments = new();
+    private string errorMessage = string.Empty;
+    private string token = string.Empty; // Placeholder to show the token on error
+
+    private void CreateEnrollment()
+    {
+        NavigationManager.NavigateTo("/enrollments/new");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            enrollments = await ccService.GetEnrollmentsAsync();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+            token = await GetTokenAsync(); // Fetch token to display
+        }
+    }
+
+    // Method to fetch the token from the ccService
+    private Task<string> GetTokenAsync()
+    {
+        // Assuming ccService provides the token as a public property
+        return Task.FromResult(ccService.token); // Replace with actual method if needed
+    }
+}
